@@ -21,12 +21,12 @@ public class Menager_Figur : MonoBehaviour
 
     public Dictionary<string, Type> Spis_Figur = new Dictionary<string, Type>()
     {
-        {"P", typeof(Pionek)},  //1
-        {"W", typeof(Wieza)}, //2
-        {"S", typeof(Skoczek)}, //3
-        {"G", typeof(Goniec)}, // 4
-        {"D", typeof(Dama)},    //5
-        {"K", typeof(Krol)} //6
+        {"P", typeof(Pionek)},      //1
+        {"W", typeof(Wieza)},       //2
+        {"S", typeof(Skoczek)},     //3
+        {"G", typeof(Goniec)},      // 4
+        {"D", typeof(Dama)},        //5
+        {"K", typeof(Krol)}         //6
 
     };
     public void Zaladuj(Board board)
@@ -155,11 +155,11 @@ public class Menager_Figur : MonoBehaviour
          }*/
 
     }
-
-    protected int[] minimax(int glebokosc, bool czy_Max,int a, int b)
+    // nie mam pomysłu ...
+    /*protected int[] minimax(int glebokosc, bool czy_Max,int a, int b)
     {
        
-    }
+    }*/
        
 
       
