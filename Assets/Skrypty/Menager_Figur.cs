@@ -61,16 +61,16 @@ public class Menager_Figur : MonoBehaviour
 
         return _nowa_Figura;
     }
-    private List<Bazowa_Figura> Stworz_Figure(Color teamColor,Color32 spriteColor,Board board)
+    private List<Bazowa_Figura> Stworz_Figure(Color teamColor, Color32 spriteColor, Board board)
     {
         List<Bazowa_Figura> nowa_Figura = new List<Bazowa_Figura>();
 
-        for (int i = 0; i < Kolejnosc_Figur.Length; i++) 
+        for (int i = 0; i < Kolejnosc_Figur.Length; i++)
         {
 
             // załadowanie typu i stworzenie obiektu
             string key = Kolejnosc_Figur[i];
-            Type typ_Figury =Spis_Figur[key];
+            Type typ_Figury = Spis_Figur[key];
 
             // przechowywanie nowej figury
             Bazowa_Figura _nowa_Figura = Stworz_F(typ_Figury);
@@ -90,7 +90,7 @@ public class Menager_Figur : MonoBehaviour
             figury[i].Miejsce(board.AllCells[i, pionki]);
 
             // ustawienie lini królewskiejh ;P
-            figury[i+8].Miejsce(board.AllCells[i, krolewscy]);
+            figury[i + 8].Miejsce(board.AllCells[i, krolewscy]);
 
 
         }
@@ -99,7 +99,7 @@ public class Menager_Figur : MonoBehaviour
     public void indeksy(List<Bazowa_Figura> figury)
     {
         for (int i = 0; i < 8; i++)
-                 figury[i].a = 1;
+            figury[i].a = 1;
         figury[8].a = 2;
         figury[9].a = 3;
         figury[10].a = 4;
@@ -118,7 +118,7 @@ public class Menager_Figur : MonoBehaviour
 
     public void Zmiana_Strony(Color kolor)
     {
-        if(!Czy_krol_zyje)
+        if (!Czy_krol_zyje)
         {
             //reset figur
             Reset_Figur();
@@ -135,229 +135,35 @@ public class Menager_Figur : MonoBehaviour
         Aktywnosc_Figur(Czarne, czy_czarne);
 
         //Promowany 
-        foreach(Bazowa_Figura figura in Promowane)
+        foreach (Bazowa_Figura figura in Promowane)
         {
             bool czyCzarny = figura.kolor != Color.white ? true : false;
             bool czy_Druzyna = czyCzarny == true ? czy_czarne : !czy_czarne;
-                figura.enabled = czy_Druzyna;
+            figura.enabled = czy_Druzyna;
         }
-        // ruch komputera
-        if(kolor == Color.white)
-        {
-            int[] ruch = minimax(2, true, Czarne); // 0 nie ważne 1 które pole 2 ktora figura
-
-            Czarne[ruch[2]].Pole_Ataku = Czarne[ruch[2]]._Podswietlone_Pola[ruch[1]];
-            Czarne[ruch[2]].Ruch();
-            Zmiana_Strony(Color.black);
-
-        }
-        
-    }
-    protected int[] minimax(int glebokosc, bool czy_Max, List<Bazowa_Figura> aktualna)
-    {
-        int temp;
-        int[] takie = new int[3] { 0,0,0} ;
-        List<Cell> Pozycja_przed_zmiana = new List<Cell>();
-
-        if (glebokosc <= 0)
-            return takie;
-        if(czy_Max)
+        // ruch komputera nie działa 
+        /* if(kolor == Color.white)
          {
-             
-             for (int i = 0; i < 16; i++)
-             {
-                Pozycja_przed_zmiana[i] = aktualna[i]._CurrentCell;
-                aktualna[i].Sprawdzenie_drogi();
-                int j = 0;
-                int a = 0;
-                if (aktualna[i].czy_ma_jakikolwiek_ruch)
-                {
-                    foreach(Cell cell in aktualna[i]._Podswietlone_Pola)
-                    {
-                        a = a + 1;
-                    }
-                    while (j<a)
-                    {
-                        aktualna[i]._CurrentCell = aktualna[i]._Podswietlone_Pola[j];
-                        if (mini > minimax(glebokosc - 1, false, Biale)[0])
-                        {
-                            mini = minimax(glebokosc - 1, false, Biale)[0];
-                            takie[1] = j;
-                            takie[2] = i;
-                            aktualna[takie[2]].Pole_Ataku = aktualna[takie[2]]._Podswietlone_Pola[1];
-                        }
-                        if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura != null)
-                        {
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 1)
-                            {
-                                if (takie[0] < takie[0] + 10)
-                                {
-                                    takie[0] = 10;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 2)
-                            {
-                                if (takie[0] < takie[0] + 30)
-                                {
-                                    takie[0] = 30;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 3)
-                            {
-                                if (takie[0] < takie[0] + 30)
-                                {
-                                    takie[0] = 30;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 4)
-                            {
-                                if (takie[0] < takie[0] + 50)
-                                {
-                                    takie[0] = 50;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 5)
-                            {
-                                if (takie[0] < takie[0] + 90)
-                                {
-                                    takie[0] = 90;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 9)
-                            {
-                                if (takie[0] < takie[0] + 900)
-                                {
-                                    takie[0] = 900;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-
-                        }
-                        
-                    }
-
-
-            
-                            j++;
-                       
-                    
-                }
-
-             }
-
-
-        }
-         else
-         {
-            for (int i = 0; i < 16; i++)
+             int[] ruch = minimax(6, true, 0 , 0); // [0] - figure [1] - pole ataku [2] - wartosc dla minimaxa 
+            Czarne[ruch[0]].Sprawdzenie_drogi();
+            if (Czarne[ruch[0]]._Podswietlone_Pola[ruch[1]] != null)
             {
-                Pozycja_przed_zmiana[i] = aktualna[i]._CurrentCell;
-                aktualna[i].Sprawdzenie_drogi();
-                int j = 0;
-                int a = 0;
-                if (aktualna[i].czy_ma_jakikolwiek_ruch)
-                {
-                    foreach (Cell cell in aktualna[i]._Podswietlone_Pola)
-                    {
-                        a = a + 1;
-                    }
-                    while (j < a)
-                    {
-                        aktualna[i]._CurrentCell = aktualna[i]._Podswietlone_Pola[j];
-                        if (max < minimax(glebokosc - 1, true, Czarne)[0])
-                        {
-                            max = minimax(glebokosc - 1, true, Czarne)[0];
-                            takie[1] = j;
-                            takie[2] = i;
-                            aktualna[takie[2]].Pole_Ataku = aktualna[takie[2]]._Podswietlone_Pola[1];
-                        }
-                        if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura != null)
-                        {
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 1)
-                            {
-                                if (takie[0] > takie[0] - 10)
-                                {
-                                    takie[0] = -10;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 2)
-                            {
-                                if (takie[0] > takie[0] - 30)
-                                {
-                                    takie[0] = -30;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 3)
-                            {
-                                if (takie[0] > takie[0] - 30)
-                                {
-                                    takie[0] = -30;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 4)
-                            {
-                                if (takie[0] > takie[0] - 50)
-                                {
-                                    takie[0] = - 50;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 5)
-                            {
-                                if (takie[0] > takie[0] - 90)
-                                {
-                                    takie[0] = -90;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-                            if (aktualna[i]._Podswietlone_Pola[j].Aktualna_Figura.a == 5)
-                            {
-                                if (takie[0] > takie[0] - 900)
-                                {
-                                    takie[0] = -900;
-                                    takie[1] = j;
-                                    takie[2] = i;
-                                }
-                            }
-
-                        }
-
-                    }
-
-
-
-                    j++;
-
-
-                }
-
+                Czarne[ruch[0]].Pole_Ataku = Czarne[ruch[0]]._Podswietlone_Pola[ruch[1]];
+                Czarne[ruch[0]].Ruch();
+                Zmiana_Strony(Color.black);
             }
-        }
-        for(int i =0; i <16; i ++)
-        {
-            aktualna[i]._CurrentCell = Pozycja_przed_zmiana[i];
-        }
-        return takie;
+         }*/
+
     }
+
+    protected int[] minimax(int glebokosc, bool czy_Max,int a, int b)
+    {
+       
+    }
+       
+
+      
+ 
 
 
     public void Reset_Figur()
