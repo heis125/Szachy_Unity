@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Menager_Figur : MonoBehaviour
 {
@@ -12,6 +13,13 @@ public class Menager_Figur : MonoBehaviour
     private List<Bazowa_Figura> Biale = null;
     private List<Bazowa_Figura> Czarne = null;
     private List<Bazowa_Figura> Promowane = new List<Bazowa_Figura>();
+
+    private Board plansza;
+
+    public bool mat_czarny;
+    public bool mat_bialy;
+
+    PossibleMove najlepszy_ruch;
 
     private string[] Kolejnosc_Figur = new string[16]
     {
@@ -24,7 +32,7 @@ public class Menager_Figur : MonoBehaviour
         {"P", typeof(Pionek)},      //1
         {"W", typeof(Wieza)},       //2
         {"S", typeof(Skoczek)},     //3
-        {"G", typeof(Goniec)},      // 4
+        {"G", typeof(Goniec)},      //4
         {"D", typeof(Dama)},        //5
         {"K", typeof(Krol)}         //6
 
@@ -44,6 +52,11 @@ public class Menager_Figur : MonoBehaviour
 
         //Biełe zaczynaja 
         Zmiana_Strony(Color.black);
+
+        mat_bialy = false;
+        mat_czarny = false;
+
+        plansza = board;
 
     }
 
@@ -141,30 +154,117 @@ public class Menager_Figur : MonoBehaviour
             bool czy_Druzyna = czyCzarny == true ? czy_czarne : !czy_czarne;
             figura.enabled = czy_Druzyna;
         }
-        // ruch komputera nie działa 
-        /* if(kolor == Color.white)
+        // ruch komputera 
+        if(kolor == Color.white)
          {
-             int[] ruch = minimax(6, true, 0 , 0); // [0] - figure [1] - pole ataku [2] - wartosc dla minimaxa 
-            Czarne[ruch[0]].Sprawdzenie_drogi();
-            if (Czarne[ruch[0]]._Podswietlone_Pola[ruch[1]] != null)
-            {
-                Czarne[ruch[0]].Pole_Ataku = Czarne[ruch[0]]._Podswietlone_Pola[ruch[1]];
-                Czarne[ruch[0]].Ruch();
+            Board newBoard = plansza;
+            int ruch = minimax(2, true, newBoard, true); 
+            if (najlepszy_ruch != null) {
+                Debug.Log(najlepszy_ruch.fromX + " " + najlepszy_ruch.fromY + " " + najlepszy_ruch.toX + " " + najlepszy_ruch.toY);
+                plansza.AllCells[najlepszy_ruch.fromX, najlepszy_ruch.fromY].Aktualna_Figura.Pole_Ataku = plansza.AllCells[najlepszy_ruch.toX, najlepszy_ruch.toY];
+                plansza.AllCells[najlepszy_ruch.fromX, najlepszy_ruch.fromY].Aktualna_Figura.Ruch();
                 Zmiana_Strony(Color.black);
             }
-         }*/
+            
+         }
 
     }
-    // nie mam pomysłu ...
-    /*protected int[] minimax(int glebokosc, bool czy_Max,int a, int b)
+    // funkcja zwracajaca ilosc punktów na planszy 
+    private int wartosc_planszy(bool czarne, Board newBoard)
     {
-       
-    }*/
-       
+        int wartosc = 0;
+        for (int x = 0; x < 8; x++)
+            for (int y = 0; y < 8; y++)
+                if (newBoard.AllCells[x, y].Aktualna_Figura)
+                {
+                    if (czarne)
+                    {
+                        if (newBoard.AllCells[x, y].Aktualna_Figura.kolor == Color.black)
+                            wartosc += newBoard.AllCells[x, y].Aktualna_Figura.wartosc;
+                        else
+                            wartosc -= newBoard.AllCells[x, y].Aktualna_Figura.wartosc;
+                    }
+                    else
+                    {
+                        if (newBoard.AllCells[x, y].Aktualna_Figura.kolor == Color.white)
+                            wartosc += newBoard.AllCells[x, y].Aktualna_Figura.wartosc;
+                        else
+                            wartosc += newBoard.AllCells[x, y].Aktualna_Figura.wartosc;
 
-      
- 
+                    }
+                } 
+        return wartosc;
+    }
+    
 
+
+    // tworzenie jakby drzewa gdzie w każdej gałęzi liczone jest co się najbardziej opłaca
+    protected int minimax(int glebokosc, bool czy_Max, Board newBoard, bool czarne)
+    {
+        if (glebokosc == 0)
+        {
+            return wartosc_planszy(true, newBoard); //wartość pionków na planszy po ruchach
+        }
+        if (czy_Max)
+        {
+            int najlepsza_wartosc = -9999999;
+            List<PossibleMove> possibleMoves = newBoard.GetPossibleMoves(czarne); //tworzy listę możliwych ruchów
+
+            possibleMoves.Sort((a, b) => 1 - 2 * UnityEngine.Random.Range(0, 1));
+            for (int i = 0; i < possibleMoves.Count; i++) //losowe ułożenie listy
+            {
+                PossibleMove temp = possibleMoves[i];
+                int randomIndex = UnityEngine.Random.Range(i, possibleMoves.Count);
+                possibleMoves[i] = possibleMoves[randomIndex];
+                possibleMoves[randomIndex] = temp;
+            }
+
+            foreach (PossibleMove move in possibleMoves)
+            {
+                Bazowa_Figura figura = newBoard.tymczasowyRuch(move);
+                int wartosc = minimax(glebokosc - 1, !czy_Max, newBoard, !czarne);
+                if (wartosc > najlepsza_wartosc) //jak znajdzie lepszą wartość to ją wstawia
+                {
+                    najlepsza_wartosc = wartosc;
+                    if (glebokosc == 2)
+                        najlepszy_ruch = move;
+                }
+                newBoard.cofnijTymczasowyRuch(move, figura);
+                //Debug.Log(" Best Move: " + najlepsza_wartosc + " Figura: " + move.fromX + "." + move.fromY);
+            }
+            return najlepsza_wartosc;
+        }
+        else
+        {
+            int najlepsza_wartosc = 9999999;
+            List<PossibleMove> possibleMoves = newBoard.GetPossibleMoves(czarne); //tworzy listę możliwych ruchów
+
+            possibleMoves.Sort((a, b) => 1 - 2 * UnityEngine.Random.Range(0, 1));
+            for (int i = 0; i < possibleMoves.Count; i++) //losowe ułożenie listy
+            {
+                PossibleMove temp = possibleMoves[i];
+                int randomIndex = UnityEngine.Random.Range(i, possibleMoves.Count);
+                possibleMoves[i] = possibleMoves[randomIndex];
+                possibleMoves[randomIndex] = temp;
+            }
+
+            foreach (PossibleMove move in possibleMoves)
+            {
+                Bazowa_Figura figura = newBoard.tymczasowyRuch(move);
+                int wartosc = minimax(glebokosc - 1, !czy_Max, newBoard, !czarne);
+                if (wartosc < najlepsza_wartosc) //jak znajdzie lepszą wartość to ją wstawia
+                {
+                    najlepsza_wartosc = wartosc;
+                    if (glebokosc == 2)
+                        najlepszy_ruch = move;
+                }
+                newBoard.cofnijTymczasowyRuch(move, figura);
+                //Debug.Log(" Best Move: " + najlepsza_wartosc + " Figura: " + move.fromX + "." + move.fromY);
+            }
+            return najlepsza_wartosc;
+        }
+
+    }
 
     public void Reset_Figur()
     {

@@ -19,6 +19,7 @@ public abstract class Bazowa_Figura : EventTrigger
 
     protected Vector3Int _Ruch = Vector3Int.one;
     public List<Cell> _Podswietlone_Pola = new List<Cell>();
+    public int wartosc;
 
     public virtual void Zaladuj(Color kolor_Druzyny, Color32 kolor_Figury, Menager_Figur nowyMenager_Figur)
     {
@@ -57,7 +58,7 @@ public abstract class Bazowa_Figura : EventTrigger
     }
 
     #region WykonywanieRuchu
-    private void Tworzenie_Ruchu(int kierunek_x, int kierunek_y, int ruch)
+    private void Tworzenie_Ruchu(int kierunek_x, int kierunek_y, int ruch, List<PossibleMove> possibleMoves = null)
     {
         // pozycja 
         int aktualne_x = _CurrentCell.Pozycja_Planszy.x;
@@ -80,6 +81,8 @@ public abstract class Bazowa_Figura : EventTrigger
             {
 
                 _Podswietlone_Pola.Add(_CurrentCell.plansza.AllCells[aktualne_x, aktualne_y]);
+                if (possibleMoves != null)
+                    possibleMoves.Add(new PossibleMove(_CurrentCell.Pozycja_Planszy.x, _CurrentCell.Pozycja_Planszy.y, aktualne_x, aktualne_y));
                 czy_ma_jakikolwiek_ruch = true;
                 break;
             }
@@ -89,25 +92,30 @@ public abstract class Bazowa_Figura : EventTrigger
 
             // pozostałe dodajemy do listy 
             _Podswietlone_Pola.Add(_CurrentCell.plansza.AllCells[aktualne_x, aktualne_y]);
+            if (possibleMoves != null)
+                possibleMoves.Add(new PossibleMove(_CurrentCell.Pozycja_Planszy.x, _CurrentCell.Pozycja_Planszy.y, aktualne_x, aktualne_y));
             czy_ma_jakikolwiek_ruch = true;
 
 
         }
 
     }
-    public virtual void Sprawdzenie_drogi()
+    public virtual bool Sprawdzenie_drogi(bool sprawdzanie_czy_mat = false, List<PossibleMove> possibleMoves = null)
     {
-        Tworzenie_Ruchu(1, 0, _Ruch.x);
-        Tworzenie_Ruchu(-1, 0, _Ruch.x);
+        Wyczysc_Pola();
+        Tworzenie_Ruchu(1, 0, _Ruch.x, possibleMoves);
+        Tworzenie_Ruchu(-1, 0, _Ruch.x, possibleMoves);
 
-        Tworzenie_Ruchu(0, 1, _Ruch.y);
-        Tworzenie_Ruchu(0, -1, _Ruch.y);
+        Tworzenie_Ruchu(0, 1, _Ruch.y, possibleMoves);
+        Tworzenie_Ruchu(0, -1, _Ruch.y, possibleMoves);
 
-        Tworzenie_Ruchu(1, 1, _Ruch.z);
-        Tworzenie_Ruchu(-1, 1, _Ruch.z);
+        Tworzenie_Ruchu(1, 1, _Ruch.z, possibleMoves);
+        Tworzenie_Ruchu(-1, 1, _Ruch.z, possibleMoves);
 
-        Tworzenie_Ruchu(-1, -1, _Ruch.z);
-        Tworzenie_Ruchu(1, -1, _Ruch.z);
+        Tworzenie_Ruchu(-1, -1, _Ruch.z, possibleMoves);
+        Tworzenie_Ruchu(1, -1, _Ruch.z, possibleMoves);
+
+        return false;
     }
 
     protected void Pokaz_Pola()
@@ -136,6 +144,9 @@ public abstract class Bazowa_Figura : EventTrigger
         //Ruch na plansz 
         transform.position = _CurrentCell.transform.position;
         Pole_Ataku = null;
+
+        //_CurrentCell.plansza
+        //Sprawdzenie_drogi(true);
     }
     #endregion
 

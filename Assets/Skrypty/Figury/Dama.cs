@@ -12,5 +12,6 @@ public class Dama : Bazowa_Figura
 
         _Ruch = new Vector3Int(7, 7, 7);
         GetComponent<Image>().sprite = Resources.Load<Sprite>("T_Dama");
+        wartosc = 1000;
     }
 }

@@ -16,6 +16,7 @@ public class Pionek : Bazowa_Figura
 
         _Ruch = kolor == Color.white ? new Vector3Int(0, 1, 1) : new Vector3Int(0, -1, -1);
         GetComponent<Image>().sprite = Resources.Load<Sprite>("T_Pionek");
+        wartosc = 100;
     }
     public override void Ruch()
     {
@@ -37,21 +38,33 @@ public class Pionek : Bazowa_Figura
 
     }
 
-    public override void Sprawdzenie_drogi()
+    public override bool Sprawdzenie_drogi(bool sprawdzanie_czy_mat = false, List<PossibleMove> possibleMoves = null)
     {
+        Wyczysc_Pola();
         int aktualne_x = _CurrentCell.Pozycja_Planszy.x;
         int aktualne_y = _CurrentCell.Pozycja_Planszy.y;
 
-        Dzialania(aktualne_x - _Ruch.z, aktualne_y + _Ruch.z, Okreslenie_Pola.Wrog);
+        if (Dzialania(aktualne_x - _Ruch.z, aktualne_y + _Ruch.z, Okreslenie_Pola.Wrog))
+            if(possibleMoves != null)
+                possibleMoves.Add(new PossibleMove(aktualne_x, aktualne_y, aktualne_x - _Ruch.z, aktualne_y + _Ruch.z));
+        if (Dzialania(aktualne_x + _Ruch.z, aktualne_y + _Ruch.z, Okreslenie_Pola.Wrog))
+            if (possibleMoves != null)
+                possibleMoves.Add(new PossibleMove(aktualne_x, aktualne_y, aktualne_x + _Ruch.z, aktualne_y + _Ruch.z));
 
-        if(Dzialania(aktualne_x,aktualne_y+_Ruch.y, Okreslenie_Pola.Wolne))
+        if (Dzialania(aktualne_x,aktualne_y+_Ruch.y, Okreslenie_Pola.Wolne))
         {
-            if(Pierwszy_Ruch)
+            if (possibleMoves != null)
+                possibleMoves.Add(new PossibleMove(aktualne_x, aktualne_y, aktualne_x , aktualne_y + _Ruch.y));
+            if (Pierwszy_Ruch)
             {
-                Dzialania(aktualne_x, aktualne_y + (_Ruch.y * 2), Okreslenie_Pola.Wolne);
+                if(Dzialania(aktualne_x, aktualne_y + (_Ruch.y * 2), Okreslenie_Pola.Wolne))
+                    if (possibleMoves != null)
+                        possibleMoves.Add(new PossibleMove(aktualne_x, aktualne_y, aktualne_x, aktualne_y + (_Ruch.y * 2)));
             }
         }
-        Dzialania(aktualne_x + _Ruch.z, aktualne_y + _Ruch.z, Okreslenie_Pola.Wrog);
+        
+
+        return false;
     }
 
     public override void Reset()

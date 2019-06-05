@@ -12,6 +12,7 @@ public class Krol : Bazowa_Figura
 
         _Ruch = new Vector3Int(1, 1, 1);
         GetComponent<Image>().sprite = Resources.Load<Sprite>("T_Krol");
+        wartosc = 10000;
     }
 
     public override void Zabij()

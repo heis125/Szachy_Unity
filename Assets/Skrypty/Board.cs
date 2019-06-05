@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,17 +25,17 @@ public enum Okreslenie_Figury
 }
 public class Board : MonoBehaviour
 {
-    #region Glowne
+   
     public GameObject CellPrefab;
 
     [HideInInspector]
     public Cell[,] AllCells = new Cell[8, 8];
-    #endregion
 
-    #region Plansza
+
+ 
     public void Stworz()
     {
-        #region Tworzenie
+      
         for(int y=0;y<8;y++)
         { 
             for(int x=0;x<8;x++)
@@ -51,9 +52,9 @@ public class Board : MonoBehaviour
                 AllCells[x, y].Zaladuj(new Vector2Int(x, y), this);
             }
         }
-        #endregion
+    
 
-        #region Kolor
+    
         for (int x = 0; x < 8; x += 2) 
         {
             for (int y = 0; y < 8; y++) 
@@ -66,9 +67,9 @@ public class Board : MonoBehaviour
                 AllCells[finalX, y].GetComponent<Image>().color = new Color32(230, 220, 187, 255);
             }
         }
-        #endregion
+       
     }
-    #endregion
+  
     
     public Okreslenie_Pola Sprawdzenie_Pola(int cel_x, int cel_y, Bazowa_Figura sprawdzanie)
     {
@@ -94,6 +95,8 @@ public class Board : MonoBehaviour
         }
         return Okreslenie_Pola.Wolne;
     }
+
+    // sprawdzenie jaka figura jest na danym polu 
     public Okreslenie_Figury jaka_figura(int x,int y)
     {
         // Czy na planszy?
@@ -125,5 +128,44 @@ public class Board : MonoBehaviour
 
         
     }
+    // Znalezienie możliwych ruchów 
+    public List<PossibleMove> GetPossibleMoves(bool czarne)
+    {
+        List<PossibleMove> possibleMoves = new List<PossibleMove>();
+        for (int x = 0; x < 8; x++)
+            for (int y = 0; y < 8; y++)
+                if (jaka_figura(x, y) != Okreslenie_Figury.None)
+                {
+                    if (czarne)
+                    {
+                        if (AllCells[x, y].Aktualna_Figura.kolor == Color.black)
+                            AllCells[x, y].Aktualna_Figura.Sprawdzenie_drogi(true, possibleMoves);
+                    }
+                    else
+                        if (AllCells[x, y].Aktualna_Figura.kolor == Color.white)
+                            AllCells[x, y].Aktualna_Figura.Sprawdzenie_drogi(true, possibleMoves);
+                }
+            
+        return possibleMoves;
+    }
+    // tymczasowe zasymulowanie wykonania ruchu 
+    public Bazowa_Figura tymczasowyRuch(PossibleMove possibleMove)
+    {
+        Bazowa_Figura figura = AllCells[possibleMove.toX, possibleMove.toY].Aktualna_Figura;
 
+        AllCells[possibleMove.toX, possibleMove.toY].Aktualna_Figura = AllCells[possibleMove.fromX, possibleMove.fromY].Aktualna_Figura;
+        AllCells[possibleMove.toX, possibleMove.toY].Aktualna_Figura._CurrentCell = AllCells[possibleMove.toX, possibleMove.toY];
+        AllCells[possibleMove.fromX, possibleMove.fromY].Aktualna_Figura = null;
+        return figura;
+    }
+    // Cofniecie symulacji wykonania ruchu 
+    public void cofnijTymczasowyRuch(PossibleMove possibleMove, Bazowa_Figura figura)
+    {
+        AllCells[possibleMove.fromX, possibleMove.fromY].Aktualna_Figura = AllCells[possibleMove.toX, possibleMove.toY].Aktualna_Figura;
+        AllCells[possibleMove.fromX, possibleMove.fromY].Aktualna_Figura._CurrentCell = AllCells[possibleMove.fromX, possibleMove.fromY];
+
+        AllCells[possibleMove.toX, possibleMove.toY].Aktualna_Figura = figura;
+        if (figura != null)
+            AllCells[possibleMove.toX, possibleMove.toY].Aktualna_Figura._CurrentCell = AllCells[possibleMove.toX, possibleMove.toY];
+    }
 }
